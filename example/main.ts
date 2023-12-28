@@ -1,5 +1,6 @@
-import { Component } from "../src/Component";
+import { Component, ComponentCtor } from "../src/Component";
 import { Entity } from "../src/Entity";
+import { Query } from "../src/Query";
 import { System } from "../src/System";
 import { World } from "../src/World";
 
@@ -14,6 +15,10 @@ class Rectangle extends Component {
     color = 'black'; 
 }
 
+class OtherComponent extends Component {
+    data = 1234;
+}
+
 const e1 = new Entity({
     components: [new Transform, new Rectangle]
 });
@@ -21,6 +26,7 @@ const e1 = new Entity({
 const e2 = new Entity({
     components: [new Transform, new Rectangle]
 });
+
 
 class Mover extends System {
     entityQuery = this.world.query([Transform]);
@@ -60,8 +66,8 @@ class Drawer extends System {
         this.ctx!.fillStyle = 'white';
         this.ctx?.fillRect(0, 0, this.canvas.width, this.canvas.height);
         for (let e of this.query.entities) {
-            const tx = e.get(Transform)!;
-            const r = e.get(Rectangle)!;
+            const tx = e.get(Transform);
+            const r = e.get(Rectangle);
             this.ctx!.fillStyle = r.color;
             this.ctx!.fillRect(tx.x, tx.y, r.width, r.height);
         }

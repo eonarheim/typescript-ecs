@@ -2,19 +2,23 @@ import { Component, ComponentCtor } from "./Component";
 import { Entity } from "./Entity";
 import { Observable } from "./Observable";
 
-export class Query<TComponent extends Component = Component> {
+export type ComponentInstance<T> = T extends ComponentCtor<infer R> ? R : never;
+
+export class Query<TKnownComponentCtors extends ComponentCtor<Component> = never> {
     public readonly id: string;
-    public components = new Set<ComponentCtor<any>>();
-    public entities: Entity[] = [];
-    public entityAdded$ = new Observable<Entity>();
+    public components = new Set<TKnownComponentCtors>();
+    public entities: Entity<ComponentInstance<TKnownComponentCtors>>[] = [];
+    public entityAdded$ = new Observable<Entity<ComponentInstance<TKnownComponentCtors>>>();
     public entityRemoved$ = new Observable<Entity>();
 
-    //TODO specify a sort?
-    //TODO what happens if a user defines the same type name as a built in type
-    constructor(public readonly requiredComponents: ComponentCtor<TComponent>[]) {
+    //TODO specify a sort with an optional options?
+    constructor(public readonly requiredComponents: TKnownComponentCtors[]) {
         for (let type of requiredComponents) {
             this.components.add(type);
         }
+        // TODO what happens if a user defines the same type name as a built in type
+        // ! TODO this could be dangerous depending on the bundler's settings for names
+        // Maybe somekind of hash function is better here?
         this.id = requiredComponents.slice().map(c => c.name).sort().join('-');
     }
 
@@ -34,10 +38,25 @@ export class Query<TComponent extends Component = Component> {
     }
 }
 
+export class TagQuery<TKnownTags extends string = never> {
+    public readonly id: string;
+    public tags = new Set<TKnownTags>();
+    public entities: Entity[] = [];
+    public entityAdded$ = new Observable<Entity>();
+    public entityRemoved$ = new Observable<Entity>();
+
+    constructor(public readonly requiredTags: TKnownTags[]) {
+        for (let tag of requiredTags) {
+            this.tags.add(tag);
+        }
+        this.id = requiredTags.slice().map(c => c).sort().join('-');
+    }
+}
+
 export class QueryEngine {
-    private _queries = new Map<string, Query>();
+    private _queries = new Map<string, Query<any>>();
     private _componentToQueriesIndex = new Map<ComponentCtor<any>, Query<any>[]>();
-    public createQuery(requiredComponents: ComponentCtor<any>[]): Query {
+    public createQuery<TKnownComponentCtors extends ComponentCtor<Component>>(requiredComponents: TKnownComponentCtors[]): Query<TKnownComponentCtors> {
         const query = new Query(requiredComponents);
 
         this._queries.set(query.id, query);

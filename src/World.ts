@@ -29,7 +29,7 @@ export class World {
         this.queryEngine.removeEntity(entity);
     }
 
-    public query(requiredTypes: ComponentCtor<any>[]): Query {
+    public query<TKnownComponentCtors extends ComponentCtor<Component>>(requiredTypes: TKnownComponentCtors[]): Query<TKnownComponentCtors> {
         return this.queryEngine.createQuery(requiredTypes);
     }
 
