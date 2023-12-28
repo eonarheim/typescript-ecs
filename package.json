@@ -1,0 +1,17 @@
+{
+  "name": "excs",
+  "version": "1.0.0",
+  "description": "",
+  "directories": {
+    "example": "example"
+  },
+  "scripts": {
+    "start": "parcel serve example/index.html"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "parcel": "2.9.3",
+    "typescript": "5.2.2"
+  }
+}
